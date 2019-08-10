@@ -4,14 +4,25 @@ $("#image-selector").change(function () {
         let dataURL = reader.result;
         $('#selected-image').attr("src", dataURL);
         $("#prediction-list").empty();
-        $("#mysvg").empty();
     }
     let file = $("#image-selector").prop('files')[0];
     reader.readAsDataURL(file);
 });
 
+$("#histo-selector").change(function () {
+    let reader = new FileReader();
+    reader.onload = function () {
+        let dataURL = reader.result;
+        $('#selected-histo').attr("src", dataURL);
+        $("#prediction-list").empty();
+    }
+    let file = $("#histo-selector").prop('files')[0];
+    reader.readAsDataURL(file);
+});
 
 
+var pre;
+var imgg;
 
 let mode;
 (async function () {
@@ -37,13 +48,6 @@ $("#histogram-button").click(async function () {
     let img_blur_gray = new cv.Mat();
     cv.cvtColor(img_blur, img_blur_gray, cv.COLOR_BGR2GRAY, dstCn = 0)
 
-    console.log('image width: ' + src.cols + '\n' +
-        'image height: ' + src.rows + '\n' +
-        'image size: ' + src.size().width + '*' + src.size().height + '\n' +
-        'image depth: ' + src.depth() + '\n' +
-        'image channels ' + src.channels() + '\n' +
-        'image type: ' + src.type() + '\n');
-
     cv.imshow('canvasOutput', img_gray);
     const b = tf.scalar(512);
 
@@ -68,8 +72,6 @@ $("#histogram-button").click(async function () {
 
 
     tensor_img_gray = tensor_img_gray.sub(tensor_img_blur_gray);
-    //tensor_img_gray = tensor_img_gray.flatten();
-    //tensor_img_gray = tensor_img_gray.div(b);
 
     const values = tensor_img_gray.dataSync();
     const dataset = Array.from(values);
@@ -80,12 +82,11 @@ $("#histogram-button").click(async function () {
     var padding = {
         top: 0,
         right: 25,
-        bottom: 52.5,
+        bottom: 51,
         left: 25
     };
 
     var svg = d3.select("body").append("svg")
-        //.attr('style', 'background-color:white')
         .attr("id","mysvg")
         .attr("width", width)
         .attr("height", height);
@@ -171,10 +172,8 @@ $("#histogram-button").click(async function () {
 });
 
 $("#predict-button").click(async function () {
-    let image = $('#selected-image').get(0);
-    console.log(image);
+    let image = $('#selected-histo').get(0);
     let tensor = tf.fromPixels(image, 1)
-       // .resizeNearestNeighbor([480, 480])
         .toFloat()
         .expandDims(0);
 
@@ -184,10 +183,10 @@ $("#predict-button").click(async function () {
     const dataset = Array.from(values);
     console.log(dataset);
     tensor = tensor.div(b);
-    //preproces to be add
 
     let predictions = await model.predict(tensor).data();
     console.log(predictions); //tensor is predict target matrix
+    pre=predictions;
 
     let top = Array.from(predictions)
         .map(function (p, i) {
@@ -203,6 +202,8 @@ $("#predict-button").click(async function () {
     top.forEach(function (p) {
         $('#prediction-list').append(`<li>${p.className}: ${p.probability.toFixed(7)}</li>`);
     });
+
+
 
 });
 
@@ -238,3 +239,37 @@ $("#save").click(async function () {
       a.click();
     };
   })
+
+$("#denoise").click(async function () {
+
+    var maxIndex=3;
+    for(let i=0,max=0;i<3;i++)
+    {
+        if(pre[i]>max)
+        {
+            max=pre[i];
+            maxIndex=i;
+        }
+    }
+    console.log(maxIndex);
+                            // 0:'snp',   medianblur
+                            //1:'gaussian', //nonopolmean
+                            //2:'speckle'  double side filter
+  
+
+    if(maxIndex==0)  //case snp
+    {
+        let img = await cv.imread('selected-image');
+        let denoise = new cv.Mat();
+        cv.medianBlur(img, denoise, 3);
+        cv.imshow('Result', denoise);
+    }
+    else if(maxIndex==2)  //case spe
+    {
+        let img = await cv.imread('selected-image');
+        let denoise = new cv.Mat();
+        cv.cvtColor(img, img, cv.COLOR_RGBA2RGB, 0);
+        cv.bilateralFilter(img, denoise, 3, 78, 78, cv.BORDER_DEFAULT);
+        cv.imshow('Result', denoise);
+    }
+});
