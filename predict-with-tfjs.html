@@ -5,88 +5,122 @@
     <title>hello</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"
         integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+    <link rel="shortcut icon" href="#">
+    <link rel="stylesheet" href="css/style.css" />
+
 </head>
 
-<style>
-    .xAxis{ display: none; }
-</style>
 
 <body>
     <main>
-        <div class="container mt-5">
+        <article>
+            <header> Denoise On Tensorflowjs</header>
+            <section>
+                <div class="container mt-5">
+                    <div class="row">
+                        <div class="col-12">
+                            <div id="loading"
+                                class="progress progress-bar progress-bar-striped progress-bar-animated mb-2">LOADING
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <div class="row" id="preDiv">
+                        <div class="col">
+                            <h2 class="ml-3">Predictions</h2>
+                            <ol id="prediction-list"></ol>
+                        </div>
+                    </div>
+                    <div id="flexbox">
+                        <div class="row box" id="inputDiv">
+                            <div class="col-12">
+                                <h2 class="ml-3">Input Image</h2>
+                                <img id="originalImg" src="" />
+                            </div>
+                        </div>
+
+                        <div class="row box" id="noiseDiv">
+                            <div class="col-12">
+                                <h2 class="ml-3">Noise Img</h2>
+                                <canvas id="snpImg"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="row box" id="hisDiv">
+                            <div class="col-12">
+                                <h2 class="ml-3">Histogram</h2>
+                                <canvas id="histo"></canvas>
+                            </div>
+                        </div>
+                    </div>
+            </section>
+            <footer>
+                <div class="row">
+                    <div class="col-6">
+                        <input id="image-selector" class="form-control border-0" type="file"></input>
+                        <input id="image-selector2" class="form-control border-0" type="file"></input>
+                    </div>
+                    <div class="col-6">
+                        <button id="predict-button" class="btn btn-dark float-right">Predict</button>
+                        <button id="histogram-button" class="btn btn-dark float-right">Histogram</button>
+                        <button id="denoise" class="btn btn-dark float-right">Denoise</button>
+                        <button type="button" id="snpbut" onclick="snpFunction()" class="btn btn-dark float-right">Salt
+                            And
+                            Pepper</button>
+
+                    </div>
+
+                </div>
+            </footer>
+        </article>
+        <!------------------------------------------------->
+        <div id="invi">
+
             <div class="row">
                 <div class="col-12">
-                    <div class="progress progress-bar progress-bar-striped progress-bar-animated mb-2">LOADING MODEL
-                    </div>
-                </div>
-
-            </div>
-            <div class="row">
-                <div class="col-6">
-                    <input id="image-selector" class="form-control border-0" type="file">Image</input>
-                    <input id="histo-selector" class="form-control border-0" type="file">Histogram</input>
-                </div>
-                <div class="col-6">
-                    <button id="predict-button" class="btn btn-dark float-right">Predict</button>
-                    <button id="histogram-button" class="btn btn-dark float-right">Histogram</button>
-                    <button id="save" class="btn btn-dark float-right">Save Histogram</button>
-                    <button id="denoise" class="btn btn-dark float-right">Denoise</button>
-
-                </div>
-
-            </div>
-            <hr>
-            <div class="row">
-                <div class="col">
-                    <h2 class="ml-3">Predictions</h2>
-                    <ol id="prediction-list"></ol>
+                    <h2 class="ml-3">denoise</h2>
+                    <canvas id="denoisepic"></canvas>
                 </div>
             </div>
-            <hr>
-            <div class="row">
+            <div class="row" id="a">
+                <div class="col-12">
+                    <h2 class="ml-3">Original_Image</h2>
+                    <canvas id="picture"></canvas>
+                </div>
+            </div>
+            <div class="row" id="b">
                 <div class="col-12">
                     <h2 class="ml-3">Image</h2>
-                    <img id="selected-image" class="ml-3" src="" />
+                    <img id="addnoise"></img>
                 </div>
-                <div class="col-12">
-                        <h2 class="ml-3">Histogram</h2>
-                        <img id="selected-histo" class="ml-3" src="" />
-                    </div>
             </div>
-            <hr>
-            <div class="row">
+            <div class="row" id="c">
                 <div class="col-12">
                     <h2 class="ml-3">OPENCV</h2>
                     <canvas id="canvasOutput"></canvas>
                 </div>
             </div>
-            <hr>
-            <div class="row">
-                    <div class="col-12">
-                        <h2 class="ml-3">Histogram</h2>
-                        <canvas id="histo"></canvas>
-                    </div>
-            </div>
-            <hr>
-            <div class="row">
-                    <div class="col-12">
-                        <h2 class="ml-3">Denoise</h2>
-                        <canvas id="Result"></canvas>
-                    </div>
-            </div>
+        </div>
+        <!------------------------------------------------->
 
 
         </div>
+
+
     </main>
 
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.13.5"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.13.3"></script>
     <script src="imagenet_classes.js"></script>
     <script src="predict.js"></script>
-    <script src="./js/utils.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha.2/js/umd/util.js"></script>
     <script src="./js/opencv.js"></script>
     <script src="http://d3js.org/d3.v3.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="./addwebjs.js"></script>
+
 
 
 
