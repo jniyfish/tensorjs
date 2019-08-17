@@ -10,12 +10,20 @@ function readURL(input) {
             image = e.target.result;
 		}
 		$('#inputDiv').show();
+		$('#deDiv').hide();
+		$('#noiseDiv').hide();
+		$('#preDiv').hide();
+		$('#prediction-list').empty();
+
         reader.readAsDataURL(input.files[0]);
     }
 }
 
 async function snpFunction() {
 	await $('#loading').show();
+	$('#chimmy').hide();
+	//$('#deDiv').hide();
+	
 	var tmp = $('#originalImg').get(0);
 	var tensor = tf.fromPixels(tmp);
 	tensor.print();

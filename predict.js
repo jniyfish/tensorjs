@@ -8,15 +8,11 @@ let mode;
 
 $("#histogram-button").click(async function () {
 
-
-
-
     let img = await cv.imread('addnoise');
 
     let img_gray = new cv.Mat();
     cv.cvtColor(img, img_gray, cv.COLOR_BGR2GRAY, dstCn = 0)
     let img_blur = new cv.Mat();
-   // cv.blur(img, img_blur, ksize, anchor = new cv.Point(-1, -1), borderType = cv.BORDER_DEFAULT)
     cv.medianBlur(img,img_blur,5);
     let img_blur_gray = new cv.Mat();
     cv.cvtColor(img_blur, img_blur_gray, cv.COLOR_BGR2GRAY, dstCn = 0)
@@ -35,7 +31,7 @@ $("#histogram-button").click(async function () {
     cv.imshow('canvasOutput', img_blur_gray);
 
     image = $('#canvasOutput').get(0);
-    let tensor_img_blur_gray = tf.fromPixels(image, 1) //img to matrix
+    let tensor_img_blur_gray = tf.fromPixels(image, 1) 
         .flatten()
         .toFloat()
         .expandDims(0);
@@ -45,14 +41,11 @@ $("#histogram-button").click(async function () {
 
 
     tensor_img_gray = tensor_img_gray.sub(tensor_img_blur_gray);
-    //tensor_img_gray = tensor_img_gray.flatten();
-    //tensor_img_gray = tensor_img_gray.div(b);
+
 
     const values = tensor_img_gray.dataSync();
     var dataset = Array.from(values);
-    console.log(dataset);
-   
-    ////////
+
  
     var width = 480;
     var height = 480;
@@ -64,7 +57,6 @@ $("#histogram-button").click(async function () {
     };
 
     var svg = d3.select("body").append("svg")
-        //.attr('style', 'background-color:white')
         .attr("id","mysvg")
         .attr("width", width)
         .attr("height", height);
@@ -85,20 +77,16 @@ $("#histogram-button").click(async function () {
     var yAxisWidth = 480;
     var xTicks = hisData.map(function (d) {
         return d.x
-    }) // ???layout?????????x
+    }) 
 
-    var xScale = d3.scale.ordinal() // ?????
-        .domain(xTicks) // ???
-        .rangeBands([0,xAxisWidth]) // ??
-      //  .rangeBands([0, xAxisWidth],0.1);
+    var xScale = d3.scale.ordinal() 
+        .domain(xTicks) 
+        .rangeBands([0,xAxisWidth]) 
 
     var high=d3.max(hisData, function(d){ return d.y; })/dataset.length;
-    var yScale = d3.scale.linear() // ?????
-       // .domain([0,0.08])
+    var yScale = d3.scale.linear() 
         .domain([ 0, high])
-        .range([0, 480*high*10.1]) // ??
-       // .domain([0,0.07])
-       // .range([0.1,yAxisWidth])
+        .range([0, 480*high*10.1]) 
         
     var xAxis = d3.svg.axis()
         .scale(xScale)
@@ -181,15 +169,16 @@ $("#histogram-button").click(async function () {
 });
 var pre;
 $("#predict-button").click(async function () {
+    
+    removeSvg();
+    
     await $('#loading').show();
-    $('#inputDiv').fadeOut(3000);
-    $('#hisDiv').fadeOut(3000);
-    $('#preDiv').fadeIn(4000);
+    $('#hisDiv').fadeOut(2000);
+    $('#preDiv').fadeIn(3000);
 
     let image = $('#histo').get(0);
     
     let tensor = await tf.fromPixels(image, 1)
-       // .resizeNearestNeighbor([480, 480])
         .toFloat()
         .expandDims(0);
     
@@ -197,12 +186,11 @@ $("#predict-button").click(async function () {
 
     const values = tensor.dataSync();
     const dataset =Array.from(values);
-    console.log(dataset);
+
     tensor = tensor.div(b);
-    console.log(tensor)  
 
     let predictions = await model.predict(tensor).data();
-    console.log(predictions); //tensor is predict target matrix
+
     pre=predictions;
     let top = Array.from(predictions)
         .map(function (p, i) {
@@ -214,70 +202,47 @@ $("#predict-button").click(async function () {
             return b.probability - a.probability;
         }).slice(0, 5);
     classname=top[0].className;
-//    $("#prediction-list").empty();
     top.forEach(function (p) {
         $('#prediction-list').append(`<li>${p.className}: ${p.probability.toFixed(7)}</li>`);
     });
-    await $('#loading').hide();
-
+   
+    await $("#denoise").click();
 
 });
 
-///////////
 
 $("#denoise").click(async function () {
+
+
+
     if(classname=="snp"){
-        let img = await cv.imread('addnoise');
+        let img = await cv.imread('snpImg');
         let deno = new cv.Mat();
         cv.medianBlur(img,deno,3);
         cv.imshow('denoisepic',deno);
-        calcpsnr(deno);  
     }
     else if (classname=="gaussian")
     {
-        let img = cv.imread('addnoise');
-     /*   cv.imshow('canvasOutput',img);
-        let img2 = $('#canvasOutput').get(0);
-        let deno = new cv.Mat();
-        const b = 255;
-        let tofloat = tf.fromPixels(img2, 3) //img to matrix
-            .toFloat();
-        tofloat = tofloat.div(b);
-        console.log(tofloat.print());
-        var ten2 = tf.tensor3d ([[[1,2,3],[1,2,3],[1,2,3]],[[4,5,6],[4,5,6],[4,5,6]],[[7,8,9],[7,8,9],[7,8,9]]]);
-        ten = tf.sum(tofloat,axis=1);
-        ten = tf.sum(ten,axis=1);
-        ten = ten.div(img2.width*img2.height);
-        ten = tofloat.sub(ten);
-        ten = ten.square();
-        ten = tf.sum(ten,axis=2);
-        ten = tf.sum(ten,axis=1);
-        ten = ten.div(img2.width*img2.height-1);
-        console.log(ten.print());
-        console.log(ten.sqrt().print());*/
-        
-        
-      //  cv.imshow('denoisepic',deno);
-        let deno = new cv.Mat();
-        cv.medianBlur(img,deno,3);
-        cv.imshow('denoisepic',deno);
-        //calcpsnr(deno);
     }
     else if(classname=="speckle")
     {
-        let img = cv.imread('addnoise');
+        let img = cv.imread('snpImg');
         let deno = new cv.Mat();
-        cv.cvtColor(img, img, cv.COLOR_RGBA2RGB, 0);
-        cv.bilateralFilter(img, deno, 3, 78, 78, cv.BORDER_DEFAULT);
+       // cv.cvtColor(img, img, cv.COLOR_RGBA2RGB, 0);
+       // cv.bilateralFilter(img, deno, 3, 78, 78, cv.BORDER_DEFAULT);
+       cv.medianBlur(img,deno,3);
         cv.imshow('denoisepic', deno);
-        //calcpsnr(deno);     //26
     }
+
+    $('#loading').hide();
+
+    $('#deDiv').fadeIn(3000);
+
     
 })
 function calcpsnr(dst)
 {
-    let i,j,mse,pnsr;
-    let sse=0.0;
+    let mse;
     let src = $('#picture').get(0);
     let dest = $('#denoisepic').get(0);
     let tensor_src = tf.fromPixels(src, 3) //img to matrix
@@ -293,3 +258,7 @@ function calcpsnr(dst)
     
 }
 
+function removeSvg() {
+    var elem = document.getElementById('mysvg');
+    elem.parentNode.removeChild(elem);
+}
