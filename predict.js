@@ -204,7 +204,7 @@ $("#denoise").click(async function () {
 
     $('#loading').hide();
     
-    $("#noiseDiv").fadeOut(1500);
+    await $("#noiseDiv").fadeOut(1500);
     $('#hisDiv').fadeOut(2000);
 
 
