@@ -21,15 +21,13 @@ function readURL(input) {
 
 async function snpFunction() {
 	await $('#loading').show();
-	$('#chimmy').hide();
-	//$('#deDiv').hide();
+
 	
 	var tmp = $('#originalImg').get(0);
 	var tensor = tf.fromPixels(tmp);
 	tensor.print();
 	const buffer = tf.buffer(tensor.shape, tensor.dtype, tensor.dataSync());
-	console.log(tmp.height, tmp.width);
-
+	
 	var n = 0;
 	var p = [0.28, 0.72];
 	var q = [0.5, 0.5];
@@ -92,6 +90,7 @@ async function snpFunction() {
   	const out = buffer.toTensor();
 	out.print();
 	await tf.toPixels(out,document.getElementById("snpImg"));
+	await tf.toPixels(out, document.getElementById("noiseCav3"));
 
 	var canvas = document.getElementById("snpImg");
 	var img    = canvas.toDataURL("image/jpeg");
@@ -102,3 +101,5 @@ async function snpFunction() {
 
 
 }
+
+

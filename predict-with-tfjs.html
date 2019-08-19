@@ -24,7 +24,7 @@
                             </div>
                         </div>
                         <div id=chimmy>
-                                <img src="./data/chimmy.jpg" style="height:100%;"> 
+                            <img src="./data/chimmy.jpg" style="height:100%;">
                         </div>
                     </div>
                     <div class="row" id="preDiv">
@@ -34,13 +34,14 @@
                         </div>
                     </div>
                     <div id="flexbox">
+                        <div class="row box show" ></div>
                         <div class="row box" id="inputDiv">
                             <div class="col-12">
-                                <h2 class="ml-3">Input Image</h2>
+                                <h2 class="ml-3">Input Img</h2>
                                 <img id="originalImg" src="" />
                             </div>
                         </div>
-
+                        <div class="row box show" ></div>
                         <div class="row box" id="noiseDiv">
                             <div class="col-12">
                                 <h2 class="ml-3">Noise Img</h2>
@@ -54,12 +55,65 @@
                                 <canvas id="histo"></canvas>
                             </div>
                         </div>
-                        <div class="row">
-                                <div class="col-12" id="deDiv">
-                                    <h2 class="ml-3">denoise</h2>
-                                    <canvas id="denoisepic"></canvas>
-                                </div>
+                      
+
+                        <div class="row show box">
+                            <div class="col-12" id="noise1">
+                                <h2 class="ml-3">Gaussian Noise</h2>
+                                <canvas id="noiseCav1"></canvas>
+                            </div>
                         </div>
+                        <div class="row show box">
+                            <div class="col-12" id="noise2">
+                                <h2 class="ml-3">Speckle Noise</h2>
+                                <canvas id="noiseCav2"></canvas>
+                            </div>
+                        </div>
+                        <div class="row show box">
+                            <div class="col-12" id="noise3">
+                                <h2 class="ml-3">SNP Noise</h2>
+                                <canvas id="noiseCav3"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="row box show">
+                            <div class="col-12" id="his1">
+                                <h2 class="ml-3">Gaussian Histogram</h2>
+                                <canvas id="hisCav1" style="width:100%"></canvas>
+                            </div>
+                        </div>
+                        <div class="row box show">
+                            <div class="col-12" id="his2">
+                                <h2 class="ml-3">Speckle Histogram</h2>
+                                <canvas id="hisCav2" style="width:100%"></canvas>
+                            </div>
+                        </div>
+                        <div class="row box show">
+                            <div class="col-12" id="his3">
+                                <h2 class="ml-3">SNP Histogram</h2>
+                                <canvas id="hisCav3" style="width:100%"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="row box show">
+                                <div class="col-12" id="De1">
+                                    <h2 class="ml-3">Gaussian Denoise</h2>
+                                    <canvas id="deCav1" style="width:100%"></canvas>
+                                </div>
+                            </div>
+                            <div class="row box show">
+                                <div class="col-12" id="De2">
+                                    <h2 class="ml-3">Speckle Denoise</h2>
+                                    <canvas id="deCav2" style="width:100%"></canvas>
+                                </div>
+                            </div>
+                            <div class="row box show">
+                                <div class="col-12" id="De3">
+                                    <h2 class="ml-3">SNP Denoise</h2>
+                                    <canvas id="deCav3" style="width:100%"></canvas>
+                                </div>
+                            </div>
+
                     </div>
             </section>
             <footer>
@@ -69,13 +123,10 @@
                         <input id="image-selector2" class="form-control border-0" type="file"></input>
                     </div>
                     <div class="col-6">
-                        <button id="predict-button" class="btn btn-dark float-right">Predict</button>
                         <button id="histogram-button" class="btn btn-dark float-right">Histogram</button>
+                        <button id="addAll" class="btn btn-dark float-right">addAll</button>
                         <button id="denoise" class="btn btn-dark float-right">Denoise</button>
-                        <button type="button" id="snpbut" onclick="snpFunction()" class="btn btn-dark float-right">Salt
-                            And
-                            Pepper</button>
-
+                        <button id="showAll" class="btn btn-dark float-right">Show</button>
                     </div>
 
                 </div>
@@ -84,7 +135,7 @@
         <!------------------------------------------------->
         <div id="invi">
 
-           
+
             <div class="row" id="a">
                 <div class="col-12">
                     <h2 class="ml-3">Original_Image</h2>
@@ -103,6 +154,12 @@
                     <canvas id="canvasOutput"></canvas>
                 </div>
             </div>
+            <div class="row">
+                    <div class="col-12" id="deDiv">
+                        <h2 class="ml-3">Denoise Img</h2>
+                        <canvas id="denoisepic"></canvas>
+                    </div>
+                </div>
         </div>
         <!------------------------------------------------->
 
@@ -121,6 +178,9 @@
     <script src="http://d3js.org/d3.v3.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="./addwebjs.js"></script>
+    <script src="./gau.js"></script>
+    <script src="./spe.js"></script>
+    <script src="./addnoise.js"></script>
 
 
 

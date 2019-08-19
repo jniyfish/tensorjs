@@ -1,4 +1,5 @@
 let mode;
+var predictTime = 0;
 (async function () {
     console.log("loading");
     model = await tf.loadModel('http://localhost:81/tfjs-models/model/model.json');
@@ -8,12 +9,13 @@ let mode;
 
 $("#histogram-button").click(async function () {
 
+
     let img = await cv.imread('addnoise');
 
     let img_gray = new cv.Mat();
     cv.cvtColor(img, img_gray, cv.COLOR_BGR2GRAY, dstCn = 0)
     let img_blur = new cv.Mat();
-    cv.medianBlur(img,img_blur,5);
+    cv.medianBlur(img, img_blur, 5);
     let img_blur_gray = new cv.Mat();
     cv.cvtColor(img_blur, img_blur_gray, cv.COLOR_BGR2GRAY, dstCn = 0)
 
@@ -25,13 +27,13 @@ $("#histogram-button").click(async function () {
         .flatten()
         .toFloat()
         .expandDims(0);
-    
+
     console.log(tensor_img_gray);
 
     cv.imshow('canvasOutput', img_blur_gray);
 
     image = $('#canvasOutput').get(0);
-    let tensor_img_blur_gray = tf.fromPixels(image, 1) 
+    let tensor_img_blur_gray = tf.fromPixels(image, 1)
         .flatten()
         .toFloat()
         .expandDims(0);
@@ -46,18 +48,18 @@ $("#histogram-button").click(async function () {
     const values = tensor_img_gray.dataSync();
     var dataset = Array.from(values);
 
- 
+
     var width = 480;
     var height = 480;
     var padding = {
         top: 0,
-        right: 8.2,    
-        bottom: 50.2,   //50.2
-        left: 18.4   
+        right: 8.2,
+        bottom: 50.2, //50.2
+        left: 18.4
     };
 
     var svg = d3.select("body").append("svg")
-        .attr("id","mysvg")
+        .attr("id", "mysvg")
         .attr("width", width)
         .attr("height", height);
 
@@ -71,38 +73,38 @@ $("#histogram-button").click(async function () {
         .frequency(false);
 
     var hisData = histogram(dataset);
-    
+
     console.log(hisData);
     var xAxisWidth = width - padding.left - padding.right
     var yAxisWidth = 480;
     var xTicks = hisData.map(function (d) {
         return d.x
-    }) 
+    })
 
-    var xScale = d3.scale.ordinal() 
-        .domain(xTicks) 
-        .rangeBands([0,xAxisWidth]) 
+    var xScale = d3.scale.ordinal()
+        .domain(xTicks)
+        .rangeBands([0, xAxisWidth])
 
-    var high=d3.max(hisData, function(d){ return d.y; })/dataset.length;
-    var yScale = d3.scale.linear() 
-        .domain([ 0, high])
-        .range([0, 480*high*10.1]) 
-        
+    var high = d3.max(hisData, function (d) {
+        return d.y;
+    }) / dataset.length;
+    var yScale = d3.scale.linear()
+        .domain([0, high])
+        .range([0, 480 * high * 10.1])
+
     var xAxis = d3.svg.axis()
         .scale(xScale)
         .orient("bottom")
 
     svg.append("g")
-        .attr("class","axis")
+        .attr("class", "axis")
         .attr("transform", "translate(" + padding.left + "," + (height - padding.bottom) + ")")
-        
-    console.log(xScale.range());
-	console.log(xScale.rangeBand());
-    
+
+
     var gRect = svg.append("g")
         .attr("transform", "translate(" + padding.left + "," + (-padding.bottom) + ")")
-        .style("opacity",1.0);
-        
+        .style("opacity", 1.0);
+
     gRect.selectAll("rect")
         .data(hisData)
         .enter()
@@ -120,28 +122,31 @@ $("#histogram-button").click(async function () {
         })
         .attr("height", function (d) {
             return yScale(d.y)
-        }
-        )
+        })
 
     ///////////////////////////
-    gRect.style("opacity",1.0);
+    gRect.style("opacity", 1.0);
 
     var lineGenerator = d3.svg.line()
-							.x(function(d){ return xScale(d.x); })
-							.y(function(d){ return height - yScale(d.y); })
-							.interpolate("basis");
-	
-	var gLine = svg.append("g")
-                    .attr("transform","translate(" + padding.left + "," + ( -padding.bottom ) +  ")")
-                    .style("color","gray")
-                    .style("fill", "gray")
-					.style("opacity",1);
-	
-	gLine.append("path")
-		.attr("class","linePath")
-		.attr("d",lineGenerator(hisData));
+        .x(function (d) {
+            return xScale(d.x);
+        })
+        .y(function (d) {
+            return height - yScale(d.y);
+        })
+        .interpolate("basis");
+
+    var gLine = svg.append("g")
+        .attr("transform", "translate(" + padding.left + "," + (-padding.bottom) + ")")
+        .style("color", "gray")
+        .style("fill", "gray")
+        .style("opacity", 1);
+
+    gLine.append("path")
+        .attr("class", "linePath")
+        .attr("d", lineGenerator(hisData));
     //add white 
-    
+
     var svg2 = document.querySelector("svg");
     var rect2 = document.querySelector("rect");
     var svgData = new XMLSerializer().serializeToString(svg2);
@@ -157,41 +162,95 @@ $("#histogram-button").click(async function () {
     ctx2.scale(1, 1);
     var img2 = document.createElement("img");
     img2.setAttribute("src", "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData))));
-    img2.onload = async function() {
-    await ctx2.drawImage(img2, 0, 0,480,480);
+    img2.onload = async function () {
+        await ctx2.drawImage(img2, 0, 0, 480, 480);
     }
-    await $("svg").empty(); 
+
+   
+
+
     $('#loading').hide();
 
     $('#inputDiv').fadeIn(3000);
-	$('#hisDiv').fadeIn(3000);
-	$('#noiseDiv').fadeIn(4000);
+    $('#hisDiv').fadeIn(3000);
+    await $('#noiseDiv').fadeIn(4000);
+    await sleep(2000);
+    predict();
 });
 var pre;
-$("#predict-button").click(async function () {
-    
-    removeSvg();
-    
-    await $('#loading').show();
-    $('#hisDiv').fadeOut(2000);
-    $('#preDiv').fadeIn(3000);
 
-    let image = $('#histo').get(0);
+$("#denoise").click(async function () {
+
+
+
+    if (classname == "snp") {
+        let img = await cv.imread('snpImg');
+        let deno = new cv.Mat();
+        cv.medianBlur(img, deno, 3);
+        cv.imshow('deCav3', deno);
+    } else if (classname == "gaussian") {
+        let img = cv.imread('snpImg');
+        let deno = new cv.Mat();
+        cv.cvtColor(img, img, cv.COLOR_RGBA2RGB, 0);
+        cv.bilateralFilter(img, deno, 3, 95, 95, cv.BORDER_DEFAULT);
+        cv.imshow('deCav1', deno);
+    } else if (classname == "speckle") {
+        let img = cv.imread('snpImg');
+        let deno = new cv.Mat();
+        cv.cvtColor(img, img, cv.COLOR_RGBA2RGB, 0);
+        cv.bilateralFilter(img, deno, 3, 78, 78, cv.BORDER_DEFAULT);
+        cv.imshow('deCav2', deno);
+    }
+
+    $('#loading').hide();
     
+    $("#noiseDiv").fadeOut(1500);
+    $('#hisDiv').fadeOut(2000);
+
+
+})
+
+
+function removeSvg() {
+    var elem = document.getElementById('mysvg');
+    elem.parentNode.removeChild(elem);
+}
+
+async function predict() {
+    removeSvg();
+    predictTime = predictTime + 1;
+    let img = await cv.imread('histo');
+    let histo = new cv.Mat();
+    if(predictTime==1){
+        cv.imshow('hisCav1', img);
+    }
+    else if(predictTime==2){
+        cv.imshow('hisCav2', img);
+    }
+    else{
+        cv.imshow('hisCav3', img);
+    }
+
+    $('#loading').show();
+
+  
+    
+    $('#preDiv').hide();
+
+    let image = await $('#histo').get(0);
+
     let tensor = await tf.fromPixels(image, 1)
         .toFloat()
         .expandDims(0);
-    
+
     const b = tf.scalar(255);
 
-    const values = tensor.dataSync();
-    const dataset =Array.from(values);
 
     tensor = tensor.div(b);
 
     let predictions = await model.predict(tensor).data();
 
-    pre=predictions;
+    pre = predictions;
     let top = Array.from(predictions)
         .map(function (p, i) {
             return {
@@ -201,64 +260,18 @@ $("#predict-button").click(async function () {
         }).sort(function (a, b) {
             return b.probability - a.probability;
         }).slice(0, 5);
-    classname=top[0].className;
+    classname = top[0].className;
     top.forEach(function (p) {
         $('#prediction-list').append(`<li>${p.className}: ${p.probability.toFixed(7)}</li>`);
     });
-   
+
     await $("#denoise").click();
-
-});
-
-
-$("#denoise").click(async function () {
-
-
-
-    if(classname=="snp"){
-        let img = await cv.imread('snpImg');
-        let deno = new cv.Mat();
-        cv.medianBlur(img,deno,3);
-        cv.imshow('denoisepic',deno);
-    }
-    else if (classname=="gaussian")
-    {
-    }
-    else if(classname=="speckle")
-    {
-        let img = cv.imread('snpImg');
-        let deno = new cv.Mat();
-       // cv.cvtColor(img, img, cv.COLOR_RGBA2RGB, 0);
-       // cv.bilateralFilter(img, deno, 3, 78, 78, cv.BORDER_DEFAULT);
-       cv.medianBlur(img,deno,3);
-        cv.imshow('denoisepic', deno);
-    }
-
-    $('#loading').hide();
-
-    $('#deDiv').fadeIn(3000);
-
-    
-})
-function calcpsnr(dst)
-{
-    let mse;
-    let src = $('#picture').get(0);
-    let dest = $('#denoisepic').get(0);
-    let tensor_src = tf.fromPixels(src, 3) //img to matrix
-        .toFloat();
-    let tensor_dst = tf.fromPixels(dest,3)
-        .toFloat();
-    tensor_dst = tensor_dst.sub(tensor_src);
-    tensor_dst = tensor_dst.square();
-    let value = tensor_dst.sum().dataSync();
-    mse = value[0] / (src.width*src.height*3);
-    psnr = 10.0 * Math.log10((255 * 255)/ mse);   
-    console.log(psnr);
-    
 }
 
-function removeSvg() {
-    var elem = document.getElementById('mysvg');
-    elem.parentNode.removeChild(elem);
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function drawHisto(predictTime) {
+
 }
