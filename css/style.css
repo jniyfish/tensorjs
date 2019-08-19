@@ -26,6 +26,9 @@
 #noiseDiv{
     display: none;
 }
+#gauDiv{
+    display: none;
+}
 #hisDiv{
     display: none;
 }
@@ -42,6 +45,7 @@
     height:500px;
     display: none;
 }
+
 header {
     text-align: center;
     justify-content: center;
@@ -60,6 +64,7 @@ footer{
     height: 50px;
     display :flex;
     flex-direction: column;
+
 }
 section {
     flex-grow: 1;
@@ -86,4 +91,8 @@ article {
     width: 32.5%;
     flex-shrink: 0;
     align-items: flex-start;
+}
+.show
+{
+    display: none;
 }
